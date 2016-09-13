@@ -3,6 +3,7 @@ package com.tonyw.sampleapps.palettecolorextraction;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Parcelable;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
@@ -93,6 +94,7 @@ public class CardAdapter extends BaseAdapter {
         }
         Bitmap bitmap = mBitmaps.get(position);
         ((ImageView) cardView.findViewById(R.id.card_image)).setImageBitmap(bitmap);
+        cardView.findViewById(R.id.color_preview).setBackgroundColor(Color.TRANSPARENT);
 
         // Extract prominent colors asynchronously and then update the card.
         new ExtractPaletteColorsAsyncTask(mContext, cardView).execute(bitmap);

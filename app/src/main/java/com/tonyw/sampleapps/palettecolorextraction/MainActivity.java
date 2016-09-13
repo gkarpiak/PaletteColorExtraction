@@ -1,26 +1,31 @@
 package com.tonyw.sampleapps.palettecolorextraction;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
 import android.widget.GridView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends Activity {
     private static final int REQUEST_CODE_ACTION_ADD_FROM_STORAGE = 0;
     private static final int REQUEST_CODE_ACTION_ADD_FROM_CAMERA = 1;
-    private static final String BUNDLE_SAVED_BITMAPS = "bitmaps";
 
     private ArrayList<Bitmap> mBitmaps;
     private GridView mGridView;
@@ -31,12 +36,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState != null) {
-            mBitmaps = savedInstanceState.getParcelableArrayList(BUNDLE_SAVED_BITMAPS);
-        } else {
-            mBitmaps = new ArrayList<>();
-        }
-
+        mBitmaps = new ArrayList<>();
         mGridView = (GridView) findViewById(R.id.color_background);
         mCardAdapter = new CardAdapter(this, mBitmaps, mGridView);
         mGridView.setAdapter(mCardAdapter);
@@ -74,23 +74,18 @@ public class MainActivity extends Activity {
         mCardAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle savedState) {
-        super.onSaveInstanceState(savedState);
-
-        savedState.putParcelableArrayList(BUNDLE_SAVED_BITMAPS, mBitmaps);
-    }
-
     /**
      * Adds cards with the default images stored in assets.
      */
     private void addCards() throws IOException {
         AssetManager assetManager = getAssets();
         for (String assetName : assetManager.list("sample_images")) {
-            InputStream assetStream = assetManager.open("sample_images/" + assetName);
-            Bitmap bitmap = BitmapFactory.decodeStream(assetStream);
-            assetStream.close();
-            addCard(bitmap);
+            addCard(getSampledBitmap(new AssetStreamProvider("sample_images/" + assetName)));
+        }
+
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Backdrops/Wallpapers");
+        for (File f : file.listFiles()) {
+            addCard(getSampledBitmap(new UriStreamProvider(Uri.fromFile(f))));
         }
     }
 
@@ -98,8 +93,10 @@ public class MainActivity extends Activity {
      * Adds the provided bitmap to a list, and repopulates the main GridView with the new card.
      */
     private void addCard(Bitmap bitmap) {
-        mBitmaps.add(bitmap);
-        mCardAdapter.notifyDataSetChanged();
+        if (null != bitmap) {
+            mBitmaps.add(bitmap);
+            mCardAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -133,14 +130,7 @@ public class MainActivity extends Activity {
         Bitmap bitmap = null;
         if (Activity.RESULT_OK == resultCode) {
             if (REQUEST_CODE_ACTION_ADD_FROM_STORAGE == requestCode) {
-                try {
-                    InputStream stream = getContentResolver().openInputStream(
-                            data.getData());
-                    bitmap = BitmapFactory.decodeStream(stream);
-                    stream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                bitmap = getSampledBitmap(new UriStreamProvider(data.getData()));
             } else if (REQUEST_CODE_ACTION_ADD_FROM_CAMERA == requestCode) {
                 Bundle extras = data.getExtras();
                 bitmap = (Bitmap) extras.get("data"); // Just a thumbnail, but works okay for this.
@@ -151,5 +141,84 @@ public class MainActivity extends Activity {
             mGridView.smoothScrollToPosition(mBitmaps.size() - 1);
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    private Bitmap getSampledBitmap(StreamProvider provider) {
+        InputStream is = null;
+        try {
+            is = provider.open(this);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(is, null, options);
+            is.close();
+
+            is = provider.open(this);
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = calculateInSampleSize(options, 512, 512);
+            return BitmapFactory.decodeStream(is, null, options);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != is) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    interface StreamProvider {
+        InputStream open(Context context) throws IOException;
+    }
+
+    static class UriStreamProvider implements StreamProvider {
+        Uri uri;
+        UriStreamProvider(Uri uri) {
+            this.uri = uri;
+        }
+
+        @Override
+        public InputStream open(Context context) throws FileNotFoundException {
+            return context.getContentResolver().openInputStream(uri);
+        }
+    }
+    static class AssetStreamProvider implements StreamProvider {
+        String assetPath;
+        AssetStreamProvider(String assetPath) {
+            this.assetPath = assetPath;
+        }
+
+        @Override
+        public InputStream open(Context context) throws IOException {
+            return context.getAssets().open(assetPath);
+        }
     }
 }

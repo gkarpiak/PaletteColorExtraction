@@ -3,139 +3,62 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_view"
-    android:layout_gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
     card_view:cardCornerRadius="4dp"
     card_view:cardUseCompatPadding="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:orientation="vertical">
-        <ImageView
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="240dp"
-            android:scaleType="fitCenter"
-            android:adjustViewBounds="true"
-            android:id="@+id/card_image" />
+            android:layout_height="240dp">
+
+            <ImageView
+                android:id="@+id/card_image"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"/>
+
+            <TextView
+                android:id="@+id/color_preview"
+                android:layout_width="92dp"
+                android:layout_height="92dp"
+                android:layout_gravity="center"
+                android:text="TEXT"
+                android:gravity="center"
+                android:textSize="32dp"/>
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="10dp">
+            android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="@dimen/color_width"
+                android:id="@+id/swatches1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/vibrant"/>
-                <View
-                    android:id="@+id/vibrant"
-                    android:layout_width="@dimen/circle_size"
-                    android:layout_height="@dimen/circle_size"
-                    
-                    android:background="@drawable/circle" />
+                android:layout_weight="1"
+                android:orientation="vertical">
+
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="@dimen/color_width"
+                android:id="@+id/swatches2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/vibrant_dark"/>
-                <View
-                    android:id="@+id/vibrant_dark"
-                    android:layout_width="@dimen/circle_size"
-                    android:layout_height="@dimen/circle_size"
-                    android:background="@drawable/circle" />
-            </LinearLayout>
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="@dimen/color_width"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/vibrant_light"/>
-                <View
-                    android:id="@+id/vibrant_light"
-                    android:layout_width="@dimen/circle_size"
-                    android:layout_height="@dimen/circle_size"
-                    android:background="@drawable/circle" />
             </LinearLayout>
-
         </LinearLayout>
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="10dp">
-
-            <LinearLayout
-                android:layout_width="@dimen/color_width"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/muted"/>
-                <View
-                    android:id="@+id/muted"
-                    android:layout_width="@dimen/circle_size"
-                    android:layout_height="@dimen/circle_size"
-                    android:background="@drawable/circle" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="@dimen/color_width"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/muted_dark"/>
-                <View
-                    android:id="@+id/muted_dark"
-                    android:layout_width="@dimen/circle_size"
-                    android:layout_height="@dimen/circle_size"
-                    android:background="@drawable/circle" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="@dimen/color_width"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/muted_light"/>
-                <View
-                    android:id="@+id/muted_light"
-                    android:layout_width="@dimen/circle_size"
-                    android:layout_height="@dimen/circle_size"
-                    android:background="@drawable/circle" />
-            </LinearLayout>
-
-        </LinearLayout>
     </LinearLayout>
 </android.support.v7.widget.CardView>
